@@ -36,11 +36,15 @@ export function isSelectedOperation(state: CalculatorState, operation: Operation
   return state.phase === 'enteringSecond' && state.pendingOperation === operation;
 }
 
+/** Sqrt is unary: enabled while entering the first operand or after a result, not during second entry. */
 export function isSqrtDisabled(state: CalculatorState): boolean {
   if (state.phase === 'loading' || state.phase === 'enteringSecond') {
     return true;
   }
-  return state.phase !== 'resultShown' || !isValidDisplay(state.display);
+  if (state.phase === 'enteringFirst' || state.phase === 'resultShown') {
+    return !isValidDisplay(state.display);
+  }
+  return true;
 }
 
 export function isEqualsDisabled(state: CalculatorState): boolean {

@@ -81,6 +81,29 @@ describe('Calculator', () => {
     );
   });
 
+  it('performs square root on the first operand', async () => {
+    const user = userEvent.setup();
+    const fetchMock = mockFetchSuccess(4);
+    render(<Calculator />);
+
+    await user.click(screen.getByRole('button', { name: '1' }));
+    await user.click(screen.getByRole('button', { name: '6' }));
+
+    expect(screen.getByRole('button', { name: 'Square root' })).toBeEnabled();
+    await user.click(screen.getByRole('button', { name: 'Square root' }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('calculator-display')).toHaveTextContent('4');
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      'http://localhost:3000/api/v1/calculate',
+      expect.objectContaining({
+        body: JSON.stringify({ operation: 'sqrt', operands: [16] }),
+      }),
+    );
+  });
+
   it('performs square root after a result is shown', async () => {
     const user = userEvent.setup();
     const fetchMock = vi

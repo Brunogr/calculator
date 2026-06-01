@@ -36,8 +36,15 @@ describe('calculatorState gating', () => {
     expect(isEqualsDisabled(state)).toBe(false);
   });
 
-  it('enables sqrt only after a result is shown', () => {
-    expect(isSqrtDisabled(initialCalculatorState)).toBe(true);
+  it('enables sqrt while entering the first operand or after a result', () => {
+    expect(isSqrtDisabled(initialCalculatorState)).toBe(false);
+
+    const enteringFirst: CalculatorState = {
+      ...initialCalculatorState,
+      phase: 'enteringFirst',
+      display: '16',
+    };
+    expect(isSqrtDisabled(enteringFirst)).toBe(false);
 
     const afterResult: CalculatorState = {
       ...initialCalculatorState,
