@@ -107,14 +107,6 @@ Start backend + frontend in **one terminal** with prefixed logs and hot reload:
 just debug
 ```
 
-`just debug` runs `scripts/dev.mjs`, which:
-- stops a stale backend on `BACKEND_PORT` and clears `backend/tmp/` when possible (skips with a warning if files are locked)
-- starts backend with [air](https://github.com/air-verse/air) (`[backend]` log prefix)
-- starts frontend with Vite (`[frontend]` log prefix)
-- sets `VITE_API_BASE_URL` from the root `.env` / `.env.example` defaults (`http://localhost:3000` when unset)
-
-Copy [`.env.example`](.env.example) to `.env` at the repo root for custom ports and API URL. `just` loads that file via `dotenv-load`.
-
 Or run each service manually in separate terminals.
 
 Start the API (terminal 1):
@@ -192,7 +184,6 @@ See [Unit tests and coverage](#unit-tests-and-coverage) for report locations and
 | `just run-backend` | Run Go API locally |
 | `just run-frontend` | Vite dev server on `FRONTEND_PORT` |
 | `just debug` | Backend + frontend in one terminal with prefixed logs (hot reload) |
-| `just run` | Alias for `just dev` |
 | `just dev` | `docker compose up --build` (full stack) |
 | `just test` | Backend and frontend tests with coverage |
 | `just test-backend` | Go tests with coverage profile and HTML report in `backend/coverage/` |
@@ -295,7 +286,7 @@ curl -s -X POST http://localhost:3000/api/v1/calculate \
 
 ## Frontend calculator behavior
 
-- Standard calculator keypad (display + buttons), not a form.
+- Standard calculator keypad (display + buttons).
 - Flow: first number → operator → second number → `=` → API call → result.
 - After an operator is chosen, other operators are disabled until `=` or **CE**; the selected operator is highlighted.
 - **CE** clears all state; **⌫** edits the current entry.
@@ -346,42 +337,6 @@ Swagger UI loads assets from the unpkg CDN in the browser.
 
 - Final arithmetic is not computed locally; the UI handles display formatting, input validation, and API calls only.
 - Material UI is the standard UI layer for this repo (see `.cursor/rules/project.mdc`).
-
-### Shared
-
-- No authentication, rate limiting, or expression parsing.
-- Docker UI build uses a browser-reachable API URL (`http://localhost:3000` by default), not an internal Docker service hostname.
-
-## Unit tests and coverage
-
-Run all tests with coverage:
-
-```bash
-just test
-```
-
-| Layer | Command | What is tested |
-|-------|---------|----------------|
-| Backend | `just test-backend` | Table-driven domain tests, HTTP handler success/error paths, config loading |
-| Frontend | `just test-frontend` | Reducer/state, API client, keyboard shortcuts, calculator interactions (Vitest + RTL) |
-
-Coverage reports are generated on each test run and checked into the repo:
-
-| Report | Location |
-|--------|----------|
-| Backend (HTML) | [`backend/coverage/index.html`](backend/coverage/index.html) |
-| Frontend (HTML) | [`frontend/coverage/index.html`](frontend/coverage/index.html) |
-
-Open the HTML files locally after `just test`, or browse them on GitHub from the links above. Regenerate with `just test` before committing if test code changes.
-
-**Latest coverage** (from `just test`):
-
-| Package / scope | Coverage |
-|-----------------|----------|
-| `internal/calculator` | 95.1% |
-| `internal/httpapi` | 87.2% |
-| `internal/config` | 100% |
-| Frontend `src/` (statements) | ~83% (Vitest threshold: 80%) |
 
 ## AI usage
 
