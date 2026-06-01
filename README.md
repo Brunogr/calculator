@@ -154,21 +154,21 @@ Build images without starting:
 just docker-build
 ```
 
-## Tests and build
+## Tests, coverage, and build
 
-All tests (backend + frontend with coverage):
+All tests with coverage reports:
 
 ```bash
 just test
 ```
 
-Backend:
+Backend only:
 
 ```bash
 just test-backend
 ```
 
-Frontend (Vitest + coverage):
+Frontend only (Vitest + coverage):
 
 ```bash
 just test-frontend
@@ -179,6 +179,8 @@ Build both:
 ```bash
 just build
 ```
+
+See [Unit tests and coverage](#unit-tests-and-coverage) for report locations and latest percentages.
 
 ## Justfile reference
 
@@ -193,8 +195,8 @@ just build
 | `just run` | Alias for `just dev` |
 | `just dev` | `docker compose up --build` (full stack) |
 | `just test` | Backend and frontend tests with coverage |
-| `just test-backend` | Go tests with coverage |
-| `just test-frontend` | Vitest with coverage |
+| `just test-backend` | Go tests with coverage profile and HTML report in `backend/coverage/` |
+| `just test-frontend` | Vitest with coverage HTML report in `frontend/coverage/` |
 | `just build` | Backend binary + frontend production build |
 | `just build-backend` | Build `backend/cmd/api` |
 | `just build-frontend` | Vite production build |
@@ -297,7 +299,6 @@ curl -s -X POST http://localhost:3000/api/v1/calculate \
 - Flow: first number → operator → second number → `=` → API call → result.
 - After an operator is chosen, other operators are disabled until `=` or **CE**; the selected operator is highlighted.
 - **CE** clears all state; **⌫** edits the current entry.
-- **√** is available only after a successful result is shown.
 - Errors use MUI `Alert`; loading uses `CircularProgress`.
 - Keyboard: `0–9`, `.`, `+` `−` `*` `/`, `Enter`/`=`, `Backspace`, `Esc`/`Delete` (clear), `%`, `^` (power), `R` (√).
 - Chaining: after a result, pick a new operator to use the result as the first operand.
@@ -317,46 +318,73 @@ Swagger UI loads assets from the unpkg CDN in the browser.
 
 ## Design decisions
 
-- **Stdlib HTTP (backend)** — no web framework; keeps the assignment small and idiomatic.
-- **Layered backend packages** — `internal/calculator` (domain), `internal/httpapi` (transport), `internal/config` (env).
-- **Stable error codes** — JSON `error.code` for client handling and tests.
-- **Embedded OpenAPI** — spec is embedded at build time for reliable Docker serving.
-- **float64 arithmetic** — standard floating-point behavior; no arbitrary-precision library.
-- **Frontend `useReducer`** — local calculator phases without global state libraries.
-- **Material UI** — readable calculator layout (`Paper`, `Grid`, `Button`, `Alert`) without custom theme abstractions.
-- **API client separation** — `calculatorClient.ts` isolates `fetch` from UI components.
-- **Button gating** — reduces invalid sequences before calling the API.
-- **Backend operation registry** — `evaluate` maps in `internal/calculator` keep `Calculate` open for new operations without growing a central switch.
-- **HTTP request parsing** — `readRequestBody` and `parseCalculateRequest` in `internal/httpapi` keep `ServeHTTP` focused on transport mapping.
+### Backend
+
+- **Stdlib HTTP** — no web framework; keeps the assignment small and idiomatic Go without pulling in routing or middleware libraries for a single endpoint.
+- **Layered packages** — `internal/calculator` (domain), `internal/httpapi` (transport), and `internal/config` (env) keep calculation logic, HTTP concerns, and configuration separate for testing and review.
+- **Stable error codes** — JSON `error.code` values (`DIVISION_BY_ZERO`, `INVALID_OPERAND_COUNT`, etc.) give the frontend and tests predictable error handling instead of parsing message strings.
+- **Embedded OpenAPI** — the spec is embedded at build time so Docker images serve `/openapi.yaml` reliably without mounting external files.
+- **float64 arithmetic** — standard floating-point behavior via Go's `math` package; no arbitrary-precision library, matching typical calculator expectations for this scope.
+- **Operation registry** — `evaluate` maps in `internal/calculator` let new operations register without growing a central switch, keeping `Calculate` open for extension.
+- **HTTP request parsing** — `readRequestBody` and `parseCalculateRequest` in `internal/httpapi` keep `ServeHTTP` focused on status codes and response mapping rather than JSON details.
+
+### Frontend
+
+- **`useReducer` for calculator phases** — local state models entry → operator → entry → calculate without Redux or other global state libraries.
+- **Material UI** — `Paper`, `Grid`, `Button`, and `Alert` provide a readable calculator layout and accessible feedback without custom theme abstractions.
+- **API client separation** — `calculatorClient.ts` isolates `fetch`, request shaping, and error parsing from UI components so tests can mock the API layer cleanly.
+- **Button gating** — after an operator is selected, other binary operators are disabled until `=` or **CE**, reducing invalid sequences before calling the API.
 
 ## Assumptions
 
-- Operations are lowercase strings; leading/trailing whitespace on `operation` is trimmed (backend).
+### Backend
+
+- Operations are lowercase strings; leading/trailing whitespace on `operation` is trimmed.
 - JSON `null` elements inside `operands` decode as `0` (Go `encoding/json` behavior).
-- No authentication, rate limiting, or expression parsing.
-- Frontend does not compute final results locally; only display formatting and input validation.
+
+### Frontend
+
+- Final arithmetic is not computed locally; the UI handles display formatting, input validation, and API calls only.
 - Material UI is the standard UI layer for this repo (see `.cursor/rules/project.mdc`).
+
+### Shared
+
+- No authentication, rate limiting, or expression parsing.
 - Docker UI build uses a browser-reachable API URL (`http://localhost:3000` by default), not an internal Docker service hostname.
+
+## Unit tests and coverage
+
+Run all tests with coverage:
+
+```bash
+just test
+```
+
+| Layer | Command | What is tested |
+|-------|---------|----------------|
+| Backend | `just test-backend` | Table-driven domain tests, HTTP handler success/error paths, config loading |
+| Frontend | `just test-frontend` | Reducer/state, API client, keyboard shortcuts, calculator interactions (Vitest + RTL) |
+
+Coverage reports are generated on each test run and checked into the repo:
+
+| Report | Location |
+|--------|----------|
+| Backend (HTML) | [`backend/coverage/index.html`](backend/coverage/index.html) |
+| Frontend (HTML) | [`frontend/coverage/index.html`](frontend/coverage/index.html) |
+
+Open the HTML files locally after `just test`, or browse them on GitHub from the links above. Regenerate with `just test` before committing if test code changes.
+
+**Latest coverage** (from `just test`):
+
+| Package / scope | Coverage |
+|-----------------|----------|
+| `internal/calculator` | 95.1% |
+| `internal/httpapi` | 87.2% |
+| `internal/config` | 100% |
+| Frontend `src/` (statements) | ~83% (Vitest threshold: 80%) |
 
 ## AI usage
 
 AI was used to support planning, implementation review, test case generation, and documentation review. All generated code was manually reviewed, edited, tested, and validated before submission.
 
 Details: [`docs/AI_USAGE.md`](docs/AI_USAGE.md)
-
-Implementation plans:
-
-- [`docs/plans/BACKEND_IMPLEMENTATION_PLAN.md`](docs/plans/BACKEND_IMPLEMENTATION_PLAN.md)
-- [`docs/plans/FRONTEND_IMPLEMENTATION_PLAN.md`](docs/plans/FRONTEND_IMPLEMENTATION_PLAN.md)
-
-## Current status
-
-| Component | Status |
-|-----------|--------|
-| Go backend API | Implemented |
-| OpenAPI / Swagger | Implemented |
-| React frontend | Implemented |
-| Backend Docker image | Implemented |
-| Frontend Docker image | Implemented |
-| Full-stack docker-compose | Implemented |
-| Tests (backend + frontend) | Implemented |

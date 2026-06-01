@@ -200,49 +200,20 @@ After implementation: run frontend tests, build, and coverage through the justfi
 Implement the Principal Review Refactor Plan: update project.mdc and implement-react-frontend skill for MUI first, refactor frontend to Material UI without changing architecture, apply backend clean-code improvements (operation registry, request parsing extract), run full tests/build/coverage, and update documentation.
 ```
 
-## Final validation (backend phase)
+## Final validation
 
-Commands run after backend implementation and review fixes:
-
-```bash
-just test-backend
-just build-backend
-just docker-build-backend
-```
-
-Results (representative):
-
-- `internal/calculator` — 94.6% coverage
-- `internal/config` — 100% coverage
-- `internal/httpapi` — 85.3% coverage
-- Docker image `calculator-backend` builds successfully
-
-## Final validation (full stack)
-
-Commands run after frontend implementation and review:
-
-```bash
-just test-backend
-just test-frontend
-just build-frontend
-just docker-build
-```
-
-Results (representative):
-
-- Backend: `internal/calculator` 94.6%, `internal/httpapi` 85.3%, `internal/config` 100%
-- Frontend: ~85% line coverage on `src/` (Vitest v8 thresholds at 80%)
-- `npm run build` produces `frontend/dist/` successfully
-
-## Final validation (principal-review refactor)
+Commands run before submission:
 
 ```bash
 just test
 just build
+just docker-build
 ```
 
-Results (representative):
+Results:
 
 - Backend: `internal/calculator` 95.1%, `internal/httpapi` 87.2%, `internal/config` 100%
-- Frontend: 21/21 tests passed; ~83% statement coverage (≥ 80% threshold)
+- Frontend: 26 tests passed; ~83% statement coverage (Vitest threshold: 80%)
+- HTML coverage reports: `backend/coverage/index.html`, `frontend/coverage/index.html`
 - Full `just build` succeeded (Go binary + Vite production bundle with MUI)
+- Docker images build successfully

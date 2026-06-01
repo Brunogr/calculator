@@ -41,7 +41,7 @@ test:
     just test-frontend
 
 test-backend:
-    cd backend; go test ./... -cover
+    cd backend; go test ./... '-coverprofile=coverage.out'; New-Item -ItemType Directory -Force coverage | Out-Null; go tool cover -html coverage.out -o coverage/index.html
 
 test-frontend:
     cd frontend; npm run test:coverage

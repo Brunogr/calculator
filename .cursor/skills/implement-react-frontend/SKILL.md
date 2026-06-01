@@ -97,7 +97,7 @@ Example:
 User selects a number, then click on `add` operator. We block the other operators and let him choose only numbers and the `=` button.
 After the result is shown, user can keep iterating over the result, adding other operators that make sense to his previous operation.
 Only restart the calculator when user clicks explicitly on the `CE` button.
-`sqrt` operator in this scenario can only be available when the result is shown, after a second number is added, it shouldn't.
+`sqrt` is a unary operation: enable it while entering the first operand or when a result is shown. Disable it while entering the second operand for a binary operation (same gating as other operators during second entry).
 
 The UI should include:
 
