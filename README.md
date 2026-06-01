@@ -7,7 +7,7 @@ A full-stack calculator take-home project with a Go REST API backend and a React
 | Layer | Stack |
 |-------|--------|
 | Backend | Go 1.22, `net/http`, OpenAPI 3, Swagger UI |
-| Frontend | React 18, TypeScript, Vite, Vitest, React Testing Library |
+| Frontend | React 18, TypeScript, Vite, Material UI, Vitest, React Testing Library |
 | Tooling | Docker, docker-compose, [just](https://github.com/casey/just) |
 
 ## Project structure
@@ -101,6 +101,22 @@ just install-frontend
 
 ## Run locally
 
+Start backend + frontend in **one terminal** with prefixed logs and hot reload:
+
+```bash
+just debug
+```
+
+`just debug` runs `scripts/dev.mjs`, which:
+- stops a stale backend on `BACKEND_PORT` and clears `backend/tmp/` when possible (skips with a warning if files are locked)
+- starts backend with [air](https://github.com/air-verse/air) (`[backend]` log prefix)
+- starts frontend with Vite (`[frontend]` log prefix)
+- sets `VITE_API_BASE_URL` from the root `.env` / `.env.example` defaults (`http://localhost:3000` when unset)
+
+Copy [`.env.example`](.env.example) to `.env` at the repo root for custom ports and API URL. `just` loads that file via `dotenv-load`.
+
+Or run each service manually in separate terminals.
+
 Start the API (terminal 1):
 
 ```bash
@@ -120,7 +136,7 @@ Open http://localhost:5173 (default). The UI calls the API at `VITE_API_BASE_URL
 Full stack:
 
 ```bash
-just docker-up
+just dev
 ```
 
 - API: http://localhost:3000 (default `BACKEND_PORT`)
@@ -173,7 +189,9 @@ just build
 | `just install-frontend` | `npm install` in `frontend/` |
 | `just run-backend` | Run Go API locally |
 | `just run-frontend` | Vite dev server on `FRONTEND_PORT` |
-| `just run` | `docker compose up --build` (full stack) |
+| `just debug` | Backend + frontend in one terminal with prefixed logs (hot reload) |
+| `just run` | Alias for `just dev` |
+| `just dev` | `docker compose up --build` (full stack) |
 | `just test` | Backend and frontend tests with coverage |
 | `just test-backend` | Go tests with coverage |
 | `just test-frontend` | Vitest with coverage |
@@ -181,7 +199,6 @@ just build
 | `just build-backend` | Build `backend/cmd/api` |
 | `just build-frontend` | Vite production build |
 | `just docker-build` | Build compose images |
-| `just docker-up` | Start full stack in Docker |
 | `just docker-down` | Stop compose services |
 
 On Windows, the justfile uses PowerShell (`;` command chaining).
@@ -281,6 +298,8 @@ curl -s -X POST http://localhost:3000/api/v1/calculate \
 - After an operator is chosen, other operators are disabled until `=` or **CE**; the selected operator is highlighted.
 - **CE** clears all state; **⌫** edits the current entry.
 - **√** is available only after a successful result is shown.
+- Errors use MUI `Alert`; loading uses `CircularProgress`.
+- Keyboard: `0–9`, `.`, `+` `−` `*` `/`, `Enter`/`=`, `Backspace`, `Esc`/`Delete` (clear), `%`, `^` (power), `R` (√).
 - Chaining: after a result, pick a new operator to use the result as the first operand.
 - Percentage: `value` `%` `percent` `=` (e.g. 200 % 15 = 30).
 
@@ -304,8 +323,11 @@ Swagger UI loads assets from the unpkg CDN in the browser.
 - **Embedded OpenAPI** — spec is embedded at build time for reliable Docker serving.
 - **float64 arithmetic** — standard floating-point behavior; no arbitrary-precision library.
 - **Frontend `useReducer`** — local calculator phases without global state libraries.
+- **Material UI** — readable calculator layout (`Paper`, `Grid`, `Button`, `Alert`) without custom theme abstractions.
 - **API client separation** — `calculatorClient.ts` isolates `fetch` from UI components.
 - **Button gating** — reduces invalid sequences before calling the API.
+- **Backend operation registry** — `evaluate` maps in `internal/calculator` keep `Calculate` open for new operations without growing a central switch.
+- **HTTP request parsing** — `readRequestBody` and `parseCalculateRequest` in `internal/httpapi` keep `ServeHTTP` focused on transport mapping.
 
 ## Assumptions
 
@@ -313,6 +335,7 @@ Swagger UI loads assets from the unpkg CDN in the browser.
 - JSON `null` elements inside `operands` decode as `0` (Go `encoding/json` behavior).
 - No authentication, rate limiting, or expression parsing.
 - Frontend does not compute final results locally; only display formatting and input validation.
+- Material UI is the standard UI layer for this repo (see `.cursor/rules/project.mdc`).
 - Docker UI build uses a browser-reachable API URL (`http://localhost:3000` by default), not an internal Docker service hostname.
 
 ## AI usage

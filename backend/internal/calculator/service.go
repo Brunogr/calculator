@@ -1,8 +1,6 @@
 package calculator
 
-import (
-	"math"
-)
+import "math"
 
 // Unary operations require exactly one operand.
 var unaryOperations = map[string]struct{}{
@@ -24,31 +22,7 @@ func Calculate(operation string, operands []float64) (float64, error) {
 	if err := validateOperands(operation, operands); err != nil {
 		return 0, err
 	}
-
-	switch operation {
-	case "add":
-		return operands[0] + operands[1], nil
-	case "subtract":
-		return operands[0] - operands[1], nil
-	case "multiply":
-		return operands[0] * operands[1], nil
-	case "divide":
-		if operands[1] == 0 {
-			return 0, newDomainError(CodeDivisionByZero, "Cannot divide by zero.")
-		}
-		return operands[0] / operands[1], nil
-	case "power":
-		return math.Pow(operands[0], operands[1]), nil
-	case "sqrt":
-		if operands[0] < 0 {
-			return 0, newDomainError(CodeNegativeSqrt, "Cannot take the square root of a negative number.")
-		}
-		return math.Sqrt(operands[0]), nil
-	case "percentage":
-		return operands[0] * operands[1] / 100, nil
-	default:
-		return 0, newDomainError(CodeUnsupportedOperation, "Unsupported operation.")
-	}
+	return evaluate(operation, operands)
 }
 
 func validateOperands(operation string, operands []float64) error {

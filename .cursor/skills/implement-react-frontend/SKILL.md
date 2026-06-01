@@ -29,10 +29,12 @@ Use:
 - React
 - TypeScript
 - Vite
-- plain CSS or CSS Modules
+- Material UI (MUI) with Emotion
 - fetch API
 - Vitest
 - React Testing Library
+
+Prefer MUI primitives for layout and controls (`Box`, `Stack`, `Grid`, `Paper`, `Button`, `Typography`, `Alert`).
 
 Avoid:
 
@@ -41,9 +43,10 @@ Avoid:
 - Redux
 - Zustand
 - React Query
-- UI component libraries
+- other UI component libraries beyond MUI
 - complex custom hooks
 - complex expression parsers
+- heavy theme customization or design-system abstractions
 
 ## Expected structure
 
@@ -73,7 +76,7 @@ Create frontend configuration that reads from Vite environment variables.
 Required frontend variable:
 
 ~~~env
-VITE_API_BASE_URL=http://localhost:8080
+VITE_API_BASE_URL=http://localhost:3000
 ~~~
 
 Rules:
@@ -116,6 +119,8 @@ The UI should include:
 - visible error message
 
 Keep the design responsive for basic mobile support.
+
+Use MUI components for the calculator shell, display, keypad, loading indicator, and error message. Keep markup readable and avoid deeply nested JSX where a small keypad configuration array helps.
 
 ## Calculator behavior
 

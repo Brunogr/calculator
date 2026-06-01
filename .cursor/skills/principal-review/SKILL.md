@@ -46,18 +46,41 @@ Check:
    - Docker setup is practical and not overcomplicated
 
 4. Go quality
-   - idiomatic package names
-   - explicit error handling
-   - table-driven tests
-   - no Java/C#/TypeScript-style overengineering
+
+   * Use idiomatic Go package names, file organization, and error handling.
+   * Keep the implementation simple, explicit, and easy to review.
+   * Prefer small functions with clear responsibilities.
+   * Use table-driven tests for calculator and handler behavior.
+   * Avoid Java/C#/TypeScript-style overengineering, unnecessary interfaces, and premature abstractions.
+   * Follow KISS: choose the simplest solution that satisfies the requirement.
+   * Prefer readability over cleverness.
+   * Use meaningful names that describe intent and expected outcome.
+   * Reuse code only when it improves clarity; avoid abstraction just to remove a few duplicated lines.
+   * Apply clean code principles: clear boundaries, low cognitive load, predictable behavior, and easy-to-follow tests.
+   * Apply SOLID principles pragmatically:
+
+     * Single Responsibility: calculation logic, HTTP handling, and configuration should stay separate.
+     * Open/Closed: adding a new operation should not require rewriting unrelated code.
+     * Dependency Inversion: avoid unnecessary interfaces, but keep dependencies easy to replace or test when there is a real need.
+   * Do not let SOLID principles create needless complexity in a small Go service.
 
 5. React quality
-   - normal calculator layout
-   - readable state management
-   - clear validation
-   - accessible labels or aria-labels for buttons
-   - loading/result/error states
-   - no complex expression parser
+
+   * Use a normal calculator layout with a clean display and button grid.
+   * Use Material UI components to improve readability, accessibility, and visual consistency.
+   * Keep component structure simple and easy to scan.
+   * Prefer readable JSX using MUI layout primitives such as `Box`, `Stack`, `Grid`, `Paper`, `Button`, `Typography`, and `Alert`.
+   * Keep state management local and understandable.
+   * Use a reducer only if it makes calculator behavior clearer; avoid global state libraries.
+   * Keep API access isolated from UI components.
+   * Keep validation clear and close to the user interaction.
+   * Ensure all buttons have accessible labels or clear text.
+   * Show loading, result, and error states clearly.
+   * Do not build a complex expression parser.
+   * Avoid deeply nested JSX and duplicated button markup where a small configuration array would improve readability.
+   * Apply clean code principles: clear component responsibilities, meaningful names, small helper functions, and easy-to-read tests.
+   * Use Material UI to simplify markup, but do not over-customize the theme or create unnecessary design abstractions.
+   * The frontend should feel polished, but still small and maintainable.
 
 6. Documentation
    - setup instructions

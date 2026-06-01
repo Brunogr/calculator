@@ -3,13 +3,17 @@ set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
 
 BACKEND_PORT := env_var_or_default("BACKEND_PORT", "3000")
 FRONTEND_PORT := env_var_or_default("FRONTEND_PORT", "5173")
+VITE_API_BASE_URL := env_var_or_default("VITE_API_BASE_URL", "http://localhost:" + BACKEND_PORT)
+
+# Export just variables (e.g. VITE_API_BASE_URL) to recipe subprocesses.
+set export := true
 
 default:
     @just --list
 
 install:
-    cd backend; go mod download
-    cd frontend; npm install
+    just install-backend
+    just install-frontend
 
 install-backend:
     cd backend; go mod download
@@ -18,9 +22,12 @@ install-frontend:
     cd frontend; npm install
 
 debug:
-    docker compose up --build
+    node scripts/dev.mjs
 
 run:
+    just dev
+
+dev:
     docker compose up --build
 
 run-backend:
@@ -30,8 +37,8 @@ run-frontend:
     cd frontend; npm run dev -- --host 0.0.0.0 --port {{FRONTEND_PORT}}
 
 test:
-    cd backend; go test ./... -cover
-    cd frontend; npm run test:coverage
+    just test-backend
+    just test-frontend
 
 test-backend:
     cd backend; go test ./... -cover
@@ -57,9 +64,6 @@ docker-build-backend:
 
 docker-build-frontend:
     docker build -t calculator-frontend --build-arg VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:3000} ./frontend
-
-docker-up:
-    docker compose up --build
 
 docker-down:
     docker compose down

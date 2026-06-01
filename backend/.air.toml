@@ -1,0 +1,13 @@
+# Hot reload for local development (just debug).
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -o ./tmp/main.exe ./cmd/api"
+  bin = "tmp/main.exe"
+  include_ext = ["go", "yaml"]
+  exclude_dir = ["tmp", "vendor", "testdata"]
+  delay = 500
+
+[log]
+  time = false

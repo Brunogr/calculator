@@ -194,6 +194,12 @@ Button gating should consider the operator selected after the first input value.
 After implementation: run frontend tests, build, and coverage through the justfile; fix failures; run principal-review for the full stack and fix concrete findings; run documentation-review.
 ```
 
+### Prompt 8
+
+```txt
+Implement the Principal Review Refactor Plan: update project.mdc and implement-react-frontend skill for MUI first, refactor frontend to Material UI without changing architecture, apply backend clean-code improvements (operation registry, request parsing extract), run full tests/build/coverage, and update documentation.
+```
+
 ## Final validation (backend phase)
 
 Commands run after backend implementation and review fixes:
@@ -227,3 +233,16 @@ Results (representative):
 - Backend: `internal/calculator` 94.6%, `internal/httpapi` 85.3%, `internal/config` 100%
 - Frontend: ~85% line coverage on `src/` (Vitest v8 thresholds at 80%)
 - `npm run build` produces `frontend/dist/` successfully
+
+## Final validation (principal-review refactor)
+
+```bash
+just test
+just build
+```
+
+Results (representative):
+
+- Backend: `internal/calculator` 95.1%, `internal/httpapi` 87.2%, `internal/config` 100%
+- Frontend: 21/21 tests passed; ~83% statement coverage (≥ 80% threshold)
+- Full `just build` succeeded (Go binary + Vite production bundle with MUI)

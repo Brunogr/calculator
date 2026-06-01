@@ -6,7 +6,9 @@ This document records the approved frontend plan and implementation outcome for 
 
 - **`src/api/calculatorClient.ts`**: `fetch` client for `POST /api/v1/calculate`
 - **`src/config/env.ts`**: `VITE_API_BASE_URL` configuration
-- **`src/components/Calculator.tsx`**: Calculator UI with `useReducer` state machine
+- **`src/components/Calculator.tsx`**: MUI composition with `useReducer` state machine
+- **`src/components/CalculatorDisplay.tsx`**, **`CalculatorKeypad.tsx`**: display and keypad UI
+- **`src/components/keypadLayout.ts`**, **`keypadButtons.ts`**: declarative keypad config and button props
 - **`src/utils/calculatorReducer.ts`**: Pure state transitions
 - **`src/utils/calculatorState.ts`**: Button gating helpers (respects selected operator in `enteringSecond`)
 - **`src/utils/display.ts`**: Display parsing/formatting helpers
@@ -34,13 +36,13 @@ frontend/
 - **CE** is the only full reset
 - **√** enabled only after a successful result (`resultShown`)
 - All calculations delegated to the backend API
-- Loading and error states visible on the display panel
+- Loading (`CircularProgress`) and errors (`Alert`) on the display panel
 
 ## Coverage targets (achieved)
 
 | Area | Target | Result |
 |------|--------|--------|
-| Overall `src/` | ≥ 80% lines | ~85% |
+| Overall `src/` | ≥ 80% lines | ~83% |
 | `calculatorClient.ts` | ≥ 90% | ~96% |
 | `Calculator.tsx` | ≥ 80% | ~94% |
 
@@ -50,7 +52,13 @@ frontend/
 - `just test-frontend` runs Vitest with coverage
 - `just run` / `just docker-up` start full stack
 
+## Refactor outcome (principal-review)
+
+- Migrated UI from plain CSS to Material UI while preserving architecture (`useReducer`, API client, gating rules).
+- Split display and keypad into focused components; keypad driven by `keypadLayout.ts`.
+- Updated `.cursor/rules/project.mdc` and `implement-react-frontend` skill to require MUI.
+
 ## Out of scope
 
-- Expression parser, global state libraries, UI kits
+- Expression parser, global state libraries (Redux/Zustand)
 - OpenAPI codegen for the frontend

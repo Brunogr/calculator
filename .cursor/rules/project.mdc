@@ -46,9 +46,11 @@ Frontend:
 - React
 - TypeScript
 - Vite
-- Plain CSS or CSS Modules
+- Material UI (MUI) for layout, buttons, typography, and feedback states
 - Vitest
 - React Testing Library
+
+Use MUI for readability and accessibility. Avoid heavy theme customization or unnecessary UI abstractions.
 
 Backend:
 

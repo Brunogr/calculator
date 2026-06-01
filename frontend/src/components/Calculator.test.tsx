@@ -158,4 +158,24 @@ describe('Calculator', () => {
 
     expect(screen.getByTestId('calculator-display')).toHaveTextContent('1');
   });
+
+  it('accepts keyboard digit and operator input', async () => {
+    const user = userEvent.setup();
+    render(<Calculator />);
+
+    await user.keyboard('12+3');
+
+    expect(screen.getByText('12 +')).toBeInTheDocument();
+    expect(screen.getByTestId('calculator-display')).toHaveTextContent('3');
+  });
+
+  it('clears with Escape key', async () => {
+    const user = userEvent.setup();
+    render(<Calculator />);
+
+    await user.keyboard('9');
+    await user.keyboard('{Escape}');
+
+    expect(screen.getByTestId('calculator-display')).toHaveTextContent('0');
+  });
 });
