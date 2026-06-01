@@ -29,6 +29,16 @@ The skills were used for:
 - final principal-level repository review
 - documentation review
 
+## Implementation plans
+
+Each major implementation phase has a plan document under [`docs/plans/`](plans/):
+
+| Plan | Document | Related prompts |
+|------|----------|-----------------|
+| Backend | [`BACKEND_IMPLEMENTATION_PLAN.md`](plans/BACKEND_IMPLEMENTATION_PLAN.md) | 2–5 |
+| Frontend | [`FRONTEND_IMPLEMENTATION_PLAN.md`](plans/FRONTEND_IMPLEMENTATION_PLAN.md) | 6–7 |
+| Principal review refactor | [`PRINCIPAL_REVIEW_REFACTOR_PLAN.md`](plans/PRINCIPAL_REVIEW_REFACTOR_PLAN.md) | 8+ |
+
 ## Prompt log
 
 ### Prompt 1
@@ -125,6 +135,8 @@ Please create a plan and what you're intending to change, so i can review.
 
 ### Prompt 2
 
+**Plan:** [`docs/plans/BACKEND_IMPLEMENTATION_PLAN.md`](plans/BACKEND_IMPLEMENTATION_PLAN.md)
+
 ```txt
 Use the project rules @.cursor/rules/project.mdc and the @.cursor/skills/implement-go-backend/SKILL.md skill.
 
@@ -146,6 +158,9 @@ Share as much information as you can so i can better evaluate the plan. Also, cr
 ```
 
 ### Prompt 3
+
+**Plan:** [`docs/plans/BACKEND_IMPLEMENTATION_PLAN.md`](plans/BACKEND_IMPLEMENTATION_PLAN.md)
+
 ```txt
 Proceed with the approved backend implementation.
 
@@ -164,19 +179,15 @@ At the end, return:
 
 ### Prompt 4
 
-```txt
-Proceed with the approved backend implementation for the Go REST API.
-
-Include comprehensive table-driven tests for domain and HTTP layers, additional error scenarios, and stable error codes. Run backend tests and coverage via the justfile. Leave documentation notes for the documentation-review skill.
-```
-
-### Prompt 5
+**Plan:** [`docs/plans/BACKEND_IMPLEMENTATION_PLAN.md`](plans/BACKEND_IMPLEMENTATION_PLAN.md)
 
 ```txt
 Run principal-review on the backend phase, fix concrete findings (Docker, config, justfile, API consistency), then documentation-review to update README and AI_USAGE.
 ```
 
-### Prompt 6
+### Prompt 5
+
+**Plan:** [`docs/plans/FRONTEND_IMPLEMENTATION_PLAN.md`](plans/FRONTEND_IMPLEMENTATION_PLAN.md)
 
 ```txt
 Use the project rules and the implement-react-frontend skill.
@@ -184,7 +195,9 @@ Use the project rules and the implement-react-frontend skill.
 Create an implementation plan for the frontend only, including files, UI/state approach, API integration, tests, coverage, and risks. Save the plan under docs/plans/.
 ```
 
-### Prompt 7
+### Prompt 6
+
+**Plan:** [`docs/plans/FRONTEND_IMPLEMENTATION_PLAN.md`](plans/FRONTEND_IMPLEMENTATION_PLAN.md)
 
 ```txt
 Proceed with the approved frontend implementation.
@@ -194,11 +207,26 @@ Button gating should consider the operator selected after the first input value.
 After implementation: run frontend tests, build, and coverage through the justfile; fix failures; run principal-review for the full stack and fix concrete findings; run documentation-review.
 ```
 
-### Prompt 8
+### Prompt 7
+
+**Plan:** [`docs/plans/PRINCIPAL_REVIEW_REFACTOR_PLAN.md`](plans/PRINCIPAL_REVIEW_REFACTOR_PLAN.md)
 
 ```txt
 Implement the Principal Review Refactor Plan: update project.mdc and implement-react-frontend skill for MUI first, refactor frontend to Material UI without changing architecture, apply backend clean-code improvements (operation registry, request parsing extract), run full tests/build/coverage, and update documentation.
 ```
+
+### Prompt 8
+
+**Plan:** [`docs/plans/PRINCIPAL_REVIEW_REFACTOR_PLAN.md`](plans/PRINCIPAL_REVIEW_REFACTOR_PLAN.md) (documentation follow-up)
+
+```txt
+run @.cursor/skills/documentation-review/SKILL.md to separate design decisions between frontend and backend.
+Review the file and remove texts that are not that relevant.
+Create still have this requirement - Unit tests and coverage report - that is not covered, so let's add a coverage badge to show an alive coverage percentage inside the github repository. This is the badge reference: https://github.com/marketplace/actions/coverage-badge.
+
+Show me what you are planning to do step by step.
+```
+
 
 ## Final validation
 
