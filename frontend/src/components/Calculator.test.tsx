@@ -1,6 +1,8 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import * as calculatorClient from '../api/calculatorClient';
+import * as calculatorReducerModule from '../utils/calculatorReducer';
 import { Calculator } from './Calculator';
 
 function mockFetchSuccess(result: number) {
@@ -24,6 +26,7 @@ function mockFetchError(message: string, code = 'DIVISION_BY_ZERO') {
 describe('Calculator', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
   it('renders initial display and controls', () => {
@@ -200,5 +203,34 @@ describe('Calculator', () => {
     await user.keyboard('{Escape}');
 
     expect(screen.getByTestId('calculator-display')).toHaveTextContent('0');
+  });
+
+  it('shows a client-side error when calculation cannot be built', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(calculatorReducerModule, 'buildCalculateRequest').mockReturnValue({
+      request: null,
+      error: null,
+    });
+    render(<Calculator />);
+
+    await user.click(screen.getByRole('button', { name: '1' }));
+    await user.click(screen.getByRole('button', { name: '+' }));
+    await user.click(screen.getByRole('button', { name: '2' }));
+    await user.click(screen.getByRole('button', { name: 'Equals' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Calculation failed.');
+  });
+
+  it('shows a generic error for unexpected calculation failures', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(calculatorClient, 'calculate').mockRejectedValue(new Error('unexpected'));
+    render(<Calculator />);
+
+    await user.click(screen.getByRole('button', { name: '1' }));
+    await user.click(screen.getByRole('button', { name: '+' }));
+    await user.click(screen.getByRole('button', { name: '2' }));
+    await user.click(screen.getByRole('button', { name: 'Equals' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('An unexpected error occurred.');
   });
 });

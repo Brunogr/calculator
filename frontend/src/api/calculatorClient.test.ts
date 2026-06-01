@@ -69,6 +69,40 @@ describe('calculatorClient', () => {
     });
   });
 
+  it('throws on invalid success payloads', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      text: async () => JSON.stringify({ result: 'not-a-number' }),
+    });
+
+    await expect(calculate({ operation: 'add', operands: [1, 2] }, fetchMock)).rejects.toMatchObject({
+      code: 'INVALID_RESPONSE',
+    });
+
+    const nonFiniteFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      text: async () => JSON.stringify({ result: Number.NaN }),
+    });
+
+    await expect(
+      calculate({ operation: 'add', operands: [1, 2] }, nonFiniteFetch),
+    ).rejects.toMatchObject({
+      code: 'INVALID_RESPONSE',
+    });
+  });
+
+  it('uses fallback error details when the API omits them', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      text: async () => JSON.stringify({}),
+    });
+
+    await expect(calculate({ operation: 'add', operands: [1, 2] }, fetchMock)).rejects.toMatchObject({
+      code: 'UNKNOWN_ERROR',
+      message: 'Calculation failed.',
+    });
+  });
+
   it('buildCalculateUrl trims trailing slash from base URL', () => {
     expect(buildCalculateUrl('http://localhost:3000/')).toBe(
       'http://localhost:3000/api/v1/calculate',

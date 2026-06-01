@@ -1,11 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import type { CalculatorState } from '../types/calculator';
 import {
+  canStartNewEntryFromResult,
   initialCalculatorState,
   isBinaryOpDisabled,
+  isBinaryOperation,
+  isClearDisabled,
+  isDigitDisabled,
   isEqualsDisabled,
   isSelectedOperation,
   isSqrtDisabled,
+  isValidDisplay,
 } from './calculatorState';
 
 describe('calculatorState gating', () => {
@@ -52,5 +57,26 @@ describe('calculatorState gating', () => {
       display: '16',
     };
     expect(isSqrtDisabled(afterResult)).toBe(false);
+  });
+
+  it('disables controls while loading and invalid displays', () => {
+    const loading: CalculatorState = { ...initialCalculatorState, phase: 'loading' };
+    expect(isBinaryOpDisabled(loading, 'add')).toBe(true);
+    expect(isDigitDisabled(loading)).toBe(true);
+    expect(isClearDisabled(loading)).toBe(true);
+    expect(isEqualsDisabled(loading)).toBe(true);
+
+    const invalidDisplay: CalculatorState = { ...initialCalculatorState, display: '.' };
+    expect(isBinaryOpDisabled(invalidDisplay, 'add')).toBe(true);
+    expect(isSqrtDisabled(invalidDisplay)).toBe(true);
+  });
+
+  it('validates display values and operation types', () => {
+    expect(isValidDisplay('12')).toBe(true);
+    expect(isValidDisplay('.')).toBe(false);
+    expect(isBinaryOperation('add')).toBe(true);
+    expect(isBinaryOperation('sqrt')).toBe(false);
+    expect(canStartNewEntryFromResult('resultShown')).toBe(true);
+    expect(canStartNewEntryFromResult('enteringFirst')).toBe(false);
   });
 });

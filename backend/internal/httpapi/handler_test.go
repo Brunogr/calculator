@@ -353,6 +353,76 @@ func TestSwaggerDisabled(t *testing.T) {
 	}
 }
 
+func TestSwaggerRedirectsWithoutTrailingSlash(t *testing.T) {
+	mux := testMux(t, true)
+	req := httptest.NewRequest(http.MethodGet, "/swagger", nil)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusMovedPermanently && rec.Code != http.StatusTemporaryRedirect {
+		t.Fatalf("status = %d, want redirect", rec.Code)
+	}
+	if got := rec.Header().Get("Location"); got != "/swagger/" {
+		t.Fatalf("Location = %q, want /swagger/", got)
+	}
+}
+
+func TestSwaggerMethodNotAllowed(t *testing.T) {
+	mux := testMux(t, true)
+	req := httptest.NewRequest(http.MethodPost, "/swagger/", nil)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusMethodNotAllowed {
+		t.Fatalf("status = %d, want 405", rec.Code)
+	}
+}
+
+func TestCalculateTrailingSlashRoute(t *testing.T) {
+	mux := testMux(t, true)
+	req := httptest.NewRequest(http.MethodPost, calculatePath+"/", strings.NewReader(`{"operation":"add","operands":[2,3]}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+}
+
+func TestCalculateHandlerUnreadableBody(t *testing.T) {
+	mux := testMux(t, true)
+	req := httptest.NewRequest(http.MethodPost, calculatePath, failingBody{})
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want 400", rec.Code)
+	}
+	errResp := decodeError(t, rec)
+	if errResp.Error.Code != "INVALID_INPUT" {
+		t.Fatalf("code = %q", errResp.Error.Code)
+	}
+}
+
+type failingBody struct{}
+
+func (failingBody) Read([]byte) (int, error) {
+	return 0, io.ErrUnexpectedEOF
+}
+
+func (failingBody) Close() error {
+	return nil
+}
+
+func TestParseErrorMessage(t *testing.T) {
+	err := &parseError{code: "INVALID_INPUT", message: "Request body is required."}
+	if err.Error() != "Request body is required." {
+		t.Fatalf("Error() = %q", err.Error())
+	}
+}
+
 func TestPercentageOperation(t *testing.T) {
 	mux := testMux(t, true)
 	rec := postCalculate(t, mux, `{"operation":"percentage","operands":[200,15]}`, nil)

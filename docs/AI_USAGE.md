@@ -227,6 +227,11 @@ Create still have this requirement - Unit tests and coverage report - that is no
 Show me what you are planning to do step by step.
 ```
 
+### Prompt 9
+
+```txt
+increase the test coverage for the entire project to 90%
+```
 
 ## Final validation
 
@@ -240,8 +245,8 @@ just docker-build
 
 Results:
 
-- Backend: `internal/calculator` 95.1%, `internal/httpapi` 87.2%, `internal/config` 100%
-- Frontend: 26 tests passed; ~83% statement coverage (Vitest threshold: 80%)
+- Backend: `internal/calculator` 97.6%, `internal/httpapi` 93.0%, `internal/config` 100% (merged internal packages: 94.9%)
+- Frontend: 58 tests passed; ~99% statement coverage (Vitest threshold: 90%)
 - Coverage badge updated by GitHub Actions on push to `main`
 - Full `just build` succeeded (Go binary + Vite production bundle with MUI)
 - Docker images build successfully
