@@ -28,10 +28,13 @@ jobs:
 
       - uses: extractions/setup-just@v2
 
-      - name: Install
-        run: |
-          cd backend && go mod download
-          cd frontend && npm ci
+      - name: Install backend
+        working-directory: backend
+        run: go mod download
+
+      - name: Install frontend
+        working-directory: frontend
+        run: npm ci
 
       - name: Test
         run: just test
