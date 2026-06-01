@@ -1,0 +1,136 @@
+openapi: 3.0.3
+info:
+  title: Calculator API
+  description: |
+    REST API for calculator operations using standard IEEE 754 double-precision (`float64`) arithmetic.
+    Results may exhibit typical floating-point rounding behavior (for example, `0.1 + 0.2`).
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Local development
+paths:
+  /api/v1/calculate:
+    post:
+      summary: Perform a calculator operation
+      operationId: calculate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalculateRequest'
+            examples:
+              add:
+                summary: Addition
+                value:
+                  operation: add
+                  operands: [10, 5]
+              percentage:
+                summary: Percentage
+                value:
+                  operation: percentage
+                  operands: [200, 15]
+              sqrt:
+                summary: Square root
+                value:
+                  operation: sqrt
+                  operands: [16]
+      responses:
+        '200':
+          description: Calculation succeeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              examples:
+                add:
+                  value:
+                    result: 15
+        '400':
+          description: Invalid input or domain error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                divisionByZero:
+                  value:
+                    error:
+                      code: DIVISION_BY_ZERO
+                      message: Cannot divide by zero.
+                invalidInput:
+                  value:
+                    error:
+                      code: INVALID_INPUT
+                      message: Request body must be valid JSON.
+        '405':
+          description: HTTP method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                methodNotAllowed:
+                  value:
+                    error:
+                      code: METHOD_NOT_ALLOWED
+                      message: Only POST is allowed for this endpoint.
+components:
+  schemas:
+    CalculateRequest:
+      type: object
+      required:
+        - operation
+        - operands
+      properties:
+        operation:
+          type: string
+          enum:
+            - add
+            - subtract
+            - multiply
+            - divide
+            - power
+            - sqrt
+            - percentage
+          description: Calculator operation to perform.
+        operands:
+          type: array
+          items:
+            type: number
+            format: double
+          description: |
+            Operands for the operation. Binary operations require exactly two values;
+            `sqrt` requires exactly one. Percentage uses `(value, percent)` order.
+    SuccessResponse:
+      type: object
+      required:
+        - result
+      properties:
+        result:
+          type: number
+          format: double
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              enum:
+                - INVALID_INPUT
+                - UNSUPPORTED_OPERATION
+                - INVALID_OPERAND_COUNT
+                - INVALID_OPERAND
+                - DIVISION_BY_ZERO
+                - NEGATIVE_SQRT
+                - METHOD_NOT_ALLOWED
+                - INTERNAL_ERROR
+            message:
+              type: string

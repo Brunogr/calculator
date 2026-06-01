@@ -122,3 +122,34 @@ Please avoid duplicating responsibilities across skills. The implementation skil
 Please create a plan and what you're intending to change, so i can review.
 
 ```
+
+### Prompt 3
+
+```txt
+Proceed with the approved backend implementation for the Go REST API.
+
+Include comprehensive table-driven tests for domain and HTTP layers, additional error scenarios, and stable error codes. Run backend tests and coverage via the justfile. Leave documentation notes for the documentation-review skill.
+```
+
+### Prompt 4
+
+```txt
+Run principal-review on the backend phase, fix concrete findings (Docker, config, justfile, API consistency), then documentation-review to update README and AI_USAGE.
+```
+
+## Final validation (backend phase)
+
+Commands run after backend implementation and review fixes:
+
+```bash
+just test-backend
+just build-backend
+just docker-build-backend
+```
+
+Results (representative):
+
+- `internal/calculator` — 94.6% coverage
+- `internal/config` — 100% coverage
+- `internal/httpapi` — 85.3% coverage
+- Docker image `calculator-backend` builds successfully
