@@ -1,0 +1,265 @@
+---
+description: Global project rules for the calculator assignment
+alwaysApply: true
+---
+
+# Calculator Project Rules
+
+This is a time-boxed take-home assignment for Sezzle Principal Software Engineer process.
+
+The goal is not to build a complex calculator platform. The goal is to demonstrate correctness, clarity, maintainability, testability, clean API design, practical AI usage, and good engineering judgment.
+
+## Priorities
+
+Prioritize:
+
+- correctness
+- clarity
+- maintainability
+- testability
+- simple architecture
+- clean documentation
+- reproducible local setup
+- reviewer-friendly commands
+- professional UX without unnecessary complexity
+
+## Avoid overengineering
+
+Do not add:
+
+- database
+- authentication
+- user accounts
+- queues
+- event sourcing
+- Kubernetes
+- complex state management
+- unnecessary abstractions
+- expression parser unless explicitly requested
+
+This project should feel deliberately simple, not under-engineered.
+
+## Stack
+
+Frontend:
+
+- React
+- TypeScript
+- Vite
+- Plain CSS or CSS Modules
+- Vitest
+- React Testing Library
+
+Backend:
+
+- Go REST API
+- Prefer Go standard library where reasonable
+- OpenAPI spec for the API contract
+- Swagger UI available for API exploration
+
+Tooling:
+
+- Docker for backend and frontend
+- docker-compose for full-stack local execution
+- justfile for common commands
+- environment/config files for dynamic ports and API URLs
+
+## UX direction
+
+Build a normal calculator layout, not a plain form.
+
+The frontend should look and behave like a simple calculator:
+
+- display area
+- digit buttons
+- decimal button
+- operation buttons
+- equals button
+- clear button
+- backspace button
+- optional advanced buttons: power, square root, percentage
+
+Do not build a complex expression parser.
+
+The frontend may manage calculator input state, but final calculations should be performed by the backend API.
+
+## Command standards
+
+Use a `justfile` as the main command interface.
+
+Expected commands:
+
+~~~bash
+just install
+just debug
+just run
+just run-backend
+just run-frontend
+just test
+just test-backend
+just test-frontend
+just build
+just docker-build
+just docker-up
+just docker-down
+~~~
+
+The README must document these commands.
+
+Prefer `just` commands in documentation instead of long raw command chains, while still documenting underlying commands when useful.
+
+## Docker standards
+
+Dockerize everything:
+
+- backend must have a Dockerfile
+- frontend must have a Dockerfile
+- root must have docker-compose.yml
+- `docker compose up --build` should run the full application locally
+
+The Docker setup should be simple and reviewer-friendly.
+
+Do not introduce production-grade orchestration complexity.
+
+## Environment and configuration standards
+
+Use environment/config files for dynamic configuration.
+
+Required files:
+
+~~~txt
+.env.example
+backend/.env.example
+frontend/.env.example
+~~~
+
+Do not commit real `.env` files.
+
+Root `.env.example` should define shared Docker/local defaults such as:
+
+~~~env
+BACKEND_PORT=8080
+FRONTEND_PORT=5173
+VITE_API_BASE_URL=http://localhost:8080
+CORS_ALLOWED_ORIGINS=http://localhost:5173
+SWAGGER_ENABLED=true
+~~~
+
+Backend configuration should support:
+
+- API port
+- allowed CORS origins
+- Swagger enabled/disabled flag if implemented
+- environment name if useful
+
+Frontend configuration should support:
+
+- backend API base URL through `VITE_API_BASE_URL`
+
+Configuration should be documented in README.md.
+
+## README documentation standard
+
+Every meaningful change must be reflected in README.md.
+
+The README must include:
+
+- project overview
+- tech stack
+- setup instructions
+- environment variables
+- how to install dependencies
+- how to run backend
+- how to run frontend
+- how to run the full stack with Docker
+- how to run tests
+- how to use the justfile
+- API examples
+- Swagger/OpenAPI information
+- supported operations
+- error response examples
+- design decisions
+- assumptions
+- AI usage summary linking to docs/AI_USAGE.md
+
+If implementation behavior changes, update the README in the same change.
+
+## API contract
+
+Prefer one endpoint:
+
+~~~http
+POST /api/v1/calculate
+Content-Type: application/json
+~~~
+
+Request shape:
+
+~~~json
+{
+  "operation": "add",
+  "operands": [10, 5]
+}
+~~~
+
+Success response:
+
+~~~json
+{
+  "result": 15
+}
+~~~
+
+Error response:
+
+~~~json
+{
+  "error": {
+    "code": "DIVISION_BY_ZERO",
+    "message": "Cannot divide by zero."
+  }
+}
+~~~
+
+Supported operations:
+
+- `add`
+- `subtract`
+- `multiply`
+- `divide`
+- `power`
+- `sqrt`
+- `percentage`
+
+Define `percentage` as:
+
+~~~txt
+percentage(value, percent) = value * percent / 100
+~~~
+
+## Workflow
+
+Before coding:
+
+- create or update the plan
+- keep scope small
+- prefer simple implementation over clever implementation
+
+During coding:
+
+- make small changes
+- run tests after meaningful changes
+- update README when behavior, commands, configuration, or setup changes
+- keep docs/AI_USAGE.md updated with concise prompts used
+
+Before submission:
+
+- run backend tests
+- run frontend tests
+- run frontend build
+- run Docker full-stack setup
+- review README
+- review OpenAPI/Swagger docs
+- run the principal-review skill
+
+Do not claim something works unless tests/builds were executed.

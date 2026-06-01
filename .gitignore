@@ -1,32 +1,251 @@
-# If you prefer the allow list template instead of the deny list, see community template:
-# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
-#
-# Binaries for programs and plugins
+# =========================================================
+
+# Environment files
+
+# =========================================================
+
+.env
+.env.*
+!.env.example
+
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# =========================================================
+
+# Logs
+
+# =========================================================
+
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# =========================================================
+
+# OS files
+
+# =========================================================
+
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# =========================================================
+
+# Editor / IDE files
+
+# =========================================================
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+.idea/
+*.swp
+*.swo
+*.swn
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# =========================================================
+
+# Cursor
+
+# Keep .cursor/rules and .cursor/skills tracked.
+
+# Ignore local/private Cursor configuration if created.
+
+# =========================================================
+
+.cursor/mcp.json
+.cursor/**/*.local.*
+.cursor/**/*.log
+
+# =========================================================
+
+# Go
+
+# =========================================================
+
+# Binaries
+
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
-
-# Test binary, built with `go test -c`
 *.test
 
-# Code coverage profiles and other test artifacts
-*.out
-coverage.*
+# Go build outputs
+
+backend/bin/
+backend/dist/
+backend/build/
+backend/tmp/
+backend/.tmp/
+
+# Coverage
+
+coverage.out
 *.coverprofile
-profile.cov
+backend/coverage.out
+backend/*.coverprofile
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
+# Go workspace local files
 
-# Go workspace file
 go.work
 go.work.sum
 
-# env file
-.env
+# Go vendor directory
 
-# Editor/IDE
-# .idea/
-# .vscode/
+# Uncomment only if you decide not to commit vendored dependencies.
+
+# vendor/
+
+# =========================================================
+
+# Node / React / Vite
+
+# =========================================================
+
+node_modules/
+frontend/node_modules/
+
+# Build outputs
+
+dist/
+build/
+frontend/dist/
+frontend/build/
+
+# Vite
+
+frontend/.vite/
+frontend/vite.config.ts.timestamp-*
+frontend/vite.config.js.timestamp-*
+
+# Test coverage
+
+coverage/
+frontend/coverage/
+
+# TypeScript
+
+*.tsbuildinfo
+frontend/*.tsbuildinfo
+
+# Package manager caches
+
+.npm/
+.pnpm-store/
+.yarn/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Optional package manager files
+
+.pnp.*
+.yarnrc.yml
+
+# =========================================================
+
+# Testing
+
+# =========================================================
+
+.junit/
+test-results/
+frontend/test-results/
+playwright-report/
+frontend/playwright-report/
+
+# =========================================================
+
+# Docker
+
+# =========================================================
+
+# Local override files may contain machine-specific settings.
+
+docker-compose.override.yml
+compose.override.yml
+
+# Local Docker volumes or generated data
+
+.docker/
+docker-data/
+data/
+
+# =========================================================
+
+# Temporary files
+
+# =========================================================
+
+tmp/
+temp/
+.cache/
+.cache-loader/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# =========================================================
+
+# Generated API artifacts
+
+# =========================================================
+
+# Keep the source OpenAPI spec tracked:
+
+# backend/api/openapi.yaml
+
+#
+
+# Ignore generated clients/servers only if tools generate them locally.
+
+backend/api/generated/
+frontend/src/api/generated/
+
+# =========================================================
+
+# Misc
+
+# =========================================================
+
+*.bak
+*.backup
+*.orig
+*.rej
+*.tmp
+*.temp
+*.pid
+*.seed
+*.pid.lock
