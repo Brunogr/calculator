@@ -109,16 +109,14 @@ backend/build/
 backend/tmp/
 backend/.tmp/
 
-# Coverage (intermediate profiles — not committed)
+# Coverage
 
 coverage.out
 *.coverprofile
 backend/coverage.out
 backend/*.coverprofile
-
-# Test coverage temp files (HTML reports in */coverage/ are committed)
-
-frontend/coverage/.tmp/
+coverage/
+frontend/coverage/
 
 # Go workspace local files
 

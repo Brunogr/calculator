@@ -1,5 +1,7 @@
 # Calculator
 
+[![cov](https://brunogr.github.io/calculator/badges/coverage.svg)](https://github.com/Brunogr/calculator/actions)
+
 A full-stack calculator take-home project with a Go REST API backend and a React TypeScript frontend. The backend performs all calculations; the UI sends operation requests to the API and displays results and errors.
 
 ## Tech stack
@@ -146,33 +148,14 @@ Build images without starting:
 just docker-build
 ```
 
-## Tests, coverage, and build
-
-All tests with coverage reports:
+## Tests and build
 
 ```bash
 just test
-```
-
-Backend only:
-
-```bash
-just test-backend
-```
-
-Frontend only (Vitest + coverage):
-
-```bash
-just test-frontend
-```
-
-Build both:
-
-```bash
 just build
 ```
 
-See [Unit tests and coverage](#unit-tests-and-coverage) for report locations and latest percentages.
+Backend or frontend only: `just test-backend`, `just test-frontend`.
 
 ## Justfile reference
 
@@ -186,8 +169,8 @@ See [Unit tests and coverage](#unit-tests-and-coverage) for report locations and
 | `just debug` | Backend + frontend in one terminal with prefixed logs (hot reload) |
 | `just dev` | `docker compose up --build` (full stack) |
 | `just test` | Backend and frontend tests with coverage |
-| `just test-backend` | Go tests with coverage profile and HTML report in `backend/coverage/` |
-| `just test-frontend` | Vitest with coverage HTML report in `frontend/coverage/` |
+| `just test-backend` | Go tests with coverage |
+| `just test-frontend` | Vitest with coverage |
 | `just build` | Backend binary + frontend production build |
 | `just build-backend` | Build `backend/cmd/api` |
 | `just build-frontend` | Vite production build |

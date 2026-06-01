@@ -37,8 +37,10 @@ export default defineConfig(({ mode }) => {
     },
     coverage: {
       provider: 'v8',
+      reportsDirectory: '../coverage',
       include: ['src/**/*.{ts,tsx}'],
       exclude: ['src/main.tsx', 'src/test/**', 'src/**/*.test.{ts,tsx}', 'src/vite-env.d.ts'],
+      reporter: ['text', 'json-summary'],
       thresholds: {
         lines: 80,
         statements: 80,
