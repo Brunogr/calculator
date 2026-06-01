@@ -123,7 +123,46 @@ Please create a plan and what you're intending to change, so i can review.
 
 ```
 
+### Prompt 2
+
+```txt
+Use the project rules @.cursor/rules/project.mdc and the @.cursor/skills/implement-go-backend/SKILL.md skill.
+
+Create an implementation plan only. Do not write code yet.
+
+Scope: backend implementation only.
+
+Please include:
+
+1. Files you will create or modify
+2. Implementation order
+3. Test strategy
+4. Coverage strategy
+5. Any risks or assumptions
+
+Keep the plan aligned with the existing rules/skills and avoid adding features outside the assignment scope.
+
+Share as much information as you can so i can better evaluate the plan. Also, create the plan md file inside the project as a documentation.
+```
+
 ### Prompt 3
+```txt
+Proceed with the approved backend implementation.
+
+Be aware to add more test cases than the ones already added as example. You can try other error scenarios as tests and you can add new error codes as needed.
+
+After implementation, run the backend test and coverage commands through the justfile. Fix failures before stopping.
+
+At the end, return:
+
+1. Summary of changes
+2. Commands executed
+3. Test and coverage results
+4. Known limitations, if any
+5. Documentation notes for the documentation-review skill
+```
+
+### Prompt 4
 
 ```txt
 Proceed with the approved backend implementation for the Go REST API.
@@ -131,10 +170,28 @@ Proceed with the approved backend implementation for the Go REST API.
 Include comprehensive table-driven tests for domain and HTTP layers, additional error scenarios, and stable error codes. Run backend tests and coverage via the justfile. Leave documentation notes for the documentation-review skill.
 ```
 
-### Prompt 4
+### Prompt 5
 
 ```txt
 Run principal-review on the backend phase, fix concrete findings (Docker, config, justfile, API consistency), then documentation-review to update README and AI_USAGE.
+```
+
+### Prompt 6
+
+```txt
+Use the project rules and the implement-react-frontend skill.
+
+Create an implementation plan for the frontend only, including files, UI/state approach, API integration, tests, coverage, and risks. Save the plan under docs/plans/.
+```
+
+### Prompt 7
+
+```txt
+Proceed with the approved frontend implementation.
+
+Button gating should consider the operator selected after the first input value.
+
+After implementation: run frontend tests, build, and coverage through the justfile; fix failures; run principal-review for the full stack and fix concrete findings; run documentation-review.
 ```
 
 ## Final validation (backend phase)
@@ -153,3 +210,20 @@ Results (representative):
 - `internal/config` — 100% coverage
 - `internal/httpapi` — 85.3% coverage
 - Docker image `calculator-backend` builds successfully
+
+## Final validation (full stack)
+
+Commands run after frontend implementation and review:
+
+```bash
+just test-backend
+just test-frontend
+just build-frontend
+just docker-build
+```
+
+Results (representative):
+
+- Backend: `internal/calculator` 94.6%, `internal/httpapi` 85.3%, `internal/config` 100%
+- Frontend: ~85% line coverage on `src/` (Vitest v8 thresholds at 80%)
+- `npm run build` produces `frontend/dist/` successfully

@@ -14,11 +14,14 @@ install:
 install-backend:
     cd backend; go mod download
 
+install-frontend:
+    cd frontend; npm install
+
 debug:
-    docker compose up --build backend
+    docker compose up --build
 
 run:
-    docker compose up --build backend
+    docker compose up --build
 
 run-backend:
     cd backend; go run ./cmd/api
@@ -28,13 +31,13 @@ run-frontend:
 
 test:
     cd backend; go test ./... -cover
-    cd frontend; npm run test
+    cd frontend; npm run test:coverage
 
 test-backend:
     cd backend; go test ./... -cover
 
 test-frontend:
-    cd frontend; npm run test
+    cd frontend; npm run test:coverage
 
 build:
     cd backend; go build ./cmd/api
@@ -43,14 +46,20 @@ build:
 build-backend:
     cd backend; go build ./cmd/api
 
+build-frontend:
+    cd frontend; npm run build
+
 docker-build:
-    docker compose build backend
+    docker compose build
 
 docker-build-backend:
     docker build -t calculator-backend ./backend
 
+docker-build-frontend:
+    docker build -t calculator-frontend --build-arg VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:3000} ./frontend
+
 docker-up:
-    docker compose up --build backend
+    docker compose up --build
 
 docker-down:
     docker compose down

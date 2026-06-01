@@ -1,21 +1,22 @@
 # Calculator
 
-A full-stack calculator take-home project with a Go REST API backend and a React TypeScript frontend (frontend in progress). The backend performs all calculations; the UI will send operation requests to the API.
+A full-stack calculator take-home project with a Go REST API backend and a React TypeScript frontend. The backend performs all calculations; the UI sends operation requests to the API and displays results and errors.
 
 ## Tech stack
 
 | Layer | Stack |
 |-------|--------|
 | Backend | Go 1.22, `net/http`, OpenAPI 3, Swagger UI |
-| Frontend | React, TypeScript, Vite, Vitest (planned) |
+| Frontend | React 18, TypeScript, Vite, Vitest, React Testing Library |
 | Tooling | Docker, docker-compose, [just](https://github.com/casey/just) |
 
 ## Project structure
 
 ```text
-backend/          Go API (implemented)
-frontend/         React app (not yet implemented)
+backend/          Go API
+frontend/         React calculator UI
 docs/             AI usage and implementation plans
+docs/plans/       Backend and frontend implementation plans
 .cursor/          Cursor rules and skills for agentic development
 docker-compose.yml
 justfile
@@ -35,15 +36,16 @@ justfile
 | Skill | Purpose |
 |-------|---------|
 | [`implement-go-backend`](.cursor/skills/implement-go-backend/SKILL.md) | Go API structure, validation, OpenAPI/Swagger, tests, Dockerfile. |
-| [`implement-react-frontend`](.cursor/skills/implement-react-frontend/SKILL.md) | React calculator UI, API client, Vitest (pending implementation). |
+| [`implement-react-frontend`](.cursor/skills/implement-react-frontend/SKILL.md) | React calculator UI, API client, Vitest, Docker. |
 | [`principal-review`](.cursor/skills/principal-review/SKILL.md) | Pre-submission quality gate across correctness, architecture, tests, docs. |
 | [`documentation-review`](.cursor/skills/documentation-review/SKILL.md) | README and `docs/AI_USAGE.md` completeness and accuracy. |
 
 ## Prerequisites
 
 - Go 1.22+
+- Node.js 20+ and npm (for local frontend development)
 - [just](https://github.com/casey/just) (recommended command runner)
-- Docker (optional, for containerized backend)
+- Docker (optional, for containerized full stack)
 
 ## Environment variables
 
@@ -71,13 +73,19 @@ APP_ENV=development
 
 The backend listens on `PORT`, or falls back to `BACKEND_PORT` when running via the root `.env` without duplicating `PORT`.
 
-**Frontend** [`frontend/.env.example`](frontend/.env.example) (for upcoming UI):
+**Frontend** [`frontend/.env.example`](frontend/.env.example):
 
 ```env
 VITE_API_BASE_URL=http://localhost:3000
 ```
 
+For local dev, copy to `frontend/.env`. For Docker, `VITE_API_BASE_URL` is passed as a build argument (browser calls the published backend URL on the host, typically `http://localhost:3000`).
+
 ## Install
+
+```bash
+just install
+```
 
 Backend only:
 
@@ -85,74 +93,96 @@ Backend only:
 just install-backend
 ```
 
-Full stack (when frontend exists):
+Frontend only:
 
 ```bash
-just install
+just install-frontend
 ```
 
-Underlying command:
+## Run locally
 
-```bash
-cd backend && go mod download
-```
-
-## Run backend (local)
+Start the API (terminal 1):
 
 ```bash
 just run-backend
 ```
 
-API base URL: `http://localhost:3000` (default). Override with `BACKEND_PORT` or `PORT` in a root `.env` file.
-
-## Run with Docker
-
-Backend service only (current phase):
-
-```bash
-just docker-up
-# or
-just docker-build-backend
-docker run --rm -p 3000:3000 calculator-backend
-```
-
-`docker compose` maps host `${BACKEND_PORT:-3000}` to container port `3000`.
-
-## Run frontend
-
-Not implemented yet. When available:
+Start the UI (terminal 2):
 
 ```bash
 just run-frontend
 ```
 
-## Tests
+Open http://localhost:5173 (default). The UI calls the API at `VITE_API_BASE_URL`.
 
-Backend tests with coverage:
+## Run with Docker
+
+Full stack:
+
+```bash
+just docker-up
+```
+
+- API: http://localhost:3000 (default `BACKEND_PORT`)
+- UI: http://localhost:5173 (default `FRONTEND_PORT`, nginx serving the built React app)
+
+Stop services:
+
+```bash
+just docker-down
+```
+
+Build images without starting:
+
+```bash
+just docker-build
+```
+
+## Tests and build
+
+All tests (backend + frontend with coverage):
+
+```bash
+just test
+```
+
+Backend:
 
 ```bash
 just test-backend
 ```
 
-Build backend binary:
+Frontend (Vitest + coverage):
 
 ```bash
-just build-backend
+just test-frontend
+```
+
+Build both:
+
+```bash
+just build
 ```
 
 ## Justfile reference
 
 | Command | Description |
 |---------|-------------|
-| `just install-backend` | Download Go modules |
-| `just run-backend` | Run API locally |
-| `just test-backend` | Backend tests + coverage |
+| `just install` | Backend modules + frontend npm packages |
+| `just install-backend` | `go mod download` |
+| `just install-frontend` | `npm install` in `frontend/` |
+| `just run-backend` | Run Go API locally |
+| `just run-frontend` | Vite dev server on `FRONTEND_PORT` |
+| `just run` | `docker compose up --build` (full stack) |
+| `just test` | Backend and frontend tests with coverage |
+| `just test-backend` | Go tests with coverage |
+| `just test-frontend` | Vitest with coverage |
+| `just build` | Backend binary + frontend production build |
 | `just build-backend` | Build `backend/cmd/api` |
-| `just docker-build-backend` | Build backend Docker image |
-| `just docker-up` | `docker compose up --build backend` |
+| `just build-frontend` | Vite production build |
+| `just docker-build` | Build compose images |
+| `just docker-up` | Start full stack in Docker |
 | `just docker-down` | Stop compose services |
-| `just install` | Backend + frontend deps (frontend pending) |
-| `just run` | Compose backend (full stack when frontend is added) |
 
 On Windows, the justfile uses PowerShell (`;` command chaining).
 
@@ -244,6 +274,18 @@ curl -s -X POST http://localhost:3000/api/v1/calculate \
 | `METHOD_NOT_ALLOWED` | 405 | Non-POST on calculate endpoint |
 | `INTERNAL_ERROR` | 500 | Unexpected server error |
 
+## Frontend calculator behavior
+
+- Standard calculator keypad (display + buttons), not a form.
+- Flow: first number → operator → second number → `=` → API call → result.
+- After an operator is chosen, other operators are disabled until `=` or **CE**; the selected operator is highlighted.
+- **CE** clears all state; **⌫** edits the current entry.
+- **√** is available only after a successful result is shown.
+- Chaining: after a result, pick a new operator to use the result as the first operand.
+- Percentage: `value` `%` `percent` `=` (e.g. 200 % 15 = 30).
+
+UI labels map to API operations: `+` → `add`, `−` → `subtract`, `×` → `multiply`, `÷` → `divide`, `xʸ` → `power`, `√` → `sqrt`, `%` → `percentage`.
+
 ## OpenAPI and Swagger
 
 | Resource | URL (server running) |
@@ -256,18 +298,22 @@ Swagger UI loads assets from the unpkg CDN in the browser.
 
 ## Design decisions
 
-- **Stdlib HTTP** — no web framework; keeps the assignment small and idiomatic.
-- **Layered packages** — `internal/calculator` (domain), `internal/httpapi` (transport), `internal/config` (env).
+- **Stdlib HTTP (backend)** — no web framework; keeps the assignment small and idiomatic.
+- **Layered backend packages** — `internal/calculator` (domain), `internal/httpapi` (transport), `internal/config` (env).
 - **Stable error codes** — JSON `error.code` for client handling and tests.
 - **Embedded OpenAPI** — spec is embedded at build time for reliable Docker serving.
 - **float64 arithmetic** — standard floating-point behavior; no arbitrary-precision library.
+- **Frontend `useReducer`** — local calculator phases without global state libraries.
+- **API client separation** — `calculatorClient.ts` isolates `fetch` from UI components.
+- **Button gating** — reduces invalid sequences before calling the API.
 
 ## Assumptions
 
-- Operations are lowercase strings; leading/trailing whitespace on `operation` is trimmed.
+- Operations are lowercase strings; leading/trailing whitespace on `operation` is trimmed (backend).
 - JSON `null` elements inside `operands` decode as `0` (Go `encoding/json` behavior).
 - No authentication, rate limiting, or expression parsing.
-- Frontend will call this API using `VITE_API_BASE_URL` (pending).
+- Frontend does not compute final results locally; only display formatting and input validation.
+- Docker UI build uses a browser-reachable API URL (`http://localhost:3000` by default), not an internal Docker service hostname.
 
 ## AI usage
 
@@ -275,7 +321,10 @@ AI was used to support planning, implementation review, test case generation, an
 
 Details: [`docs/AI_USAGE.md`](docs/AI_USAGE.md)
 
-Implementation plan: [`docs/BACKEND_IMPLEMENTATION_PLAN.md`](docs/BACKEND_IMPLEMENTATION_PLAN.md)
+Implementation plans:
+
+- [`docs/plans/BACKEND_IMPLEMENTATION_PLAN.md`](docs/plans/BACKEND_IMPLEMENTATION_PLAN.md)
+- [`docs/plans/FRONTEND_IMPLEMENTATION_PLAN.md`](docs/plans/FRONTEND_IMPLEMENTATION_PLAN.md)
 
 ## Current status
 
@@ -283,7 +332,8 @@ Implementation plan: [`docs/BACKEND_IMPLEMENTATION_PLAN.md`](docs/BACKEND_IMPLEM
 |-----------|--------|
 | Go backend API | Implemented |
 | OpenAPI / Swagger | Implemented |
+| React frontend | Implemented |
 | Backend Docker image | Implemented |
-| docker-compose (backend) | Implemented |
-| React frontend | Pending |
-| Full-stack compose | Pending (frontend service) |
+| Frontend Docker image | Implemented |
+| Full-stack docker-compose | Implemented |
+| Tests (backend + frontend) | Implemented |
