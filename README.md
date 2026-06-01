@@ -157,6 +157,22 @@ just build
 
 Backend or frontend only: `just test-backend`, `just test-frontend`.
 
+## Testing and coverage
+
+Coverage is tracked through the repository badge and generated during CI. The final validation for this submission reached:
+
+Backend internal packages: 94.9% merged coverage
+Frontend: approximately 99% statement coverage
+Frontend coverage threshold: 90%
+
+The full validation commands used before submission were:
+
+```bash
+just test
+just build
+just docker-build
+```
+
 ## Justfile reference
 
 | Command | Description |
@@ -294,36 +310,67 @@ Swagger UI loads assets from the unpkg CDN in the browser.
 
 ### Backend
 
-- **Single endpoint, operation + operands** — all calculations use one route, `POST /api/v1/calculate`, with a JSON body `{ "operation": "...", "operands": [...] }` instead of separate URLs per operation (for example `/add`, `/divide`). That keeps the API small and predictable: one handler, one OpenAPI path, one frontend client function, and one place to document errors and validation. The `operation` field selects behavior (`add`, `sqrt`, `percentage`, and so on); the `operands` array carries the inputs. Binary operations send two values, unary operations send one—the server validates count per operation, so the contract stays uniform without overloading HTTP paths or request shapes. Adding a new calculator function is mostly a matter of registering an evaluator and extending the allowed `operation` values, not introducing new routes, middleware, or client wrappers. For this assignment that is the right balance: extensible enough to grow beyond the initial seven operations, simple enough for reviewers to exercise with curl or Swagger in one place.
-- **Stdlib HTTP** — no web framework; keeps the assignment small and idiomatic Go without pulling in routing or middleware libraries for a single endpoint.
-- **Layered packages** — `internal/calculator` (domain), `internal/httpapi` (transport), and `internal/config` (env) keep calculation logic, HTTP concerns, and configuration separate for testing and review.
-- **Stable error codes** — JSON `error.code` values (`DIVISION_BY_ZERO`, `INVALID_OPERAND_COUNT`, etc.) give the frontend and tests predictable error handling instead of parsing message strings.
-- **Embedded OpenAPI** — the spec is embedded at build time so Docker images serve `/openapi.yaml` reliably without mounting external files.
-- **float64 arithmetic** — standard floating-point behavior via Go's `math` package; no arbitrary-precision library, matching typical calculator expectations for this scope.
-- **Operation registry** — `evaluate` maps in `internal/calculator` let new operations register without growing a central switch, keeping `Calculate` open for extension.
-- **HTTP request parsing** — `readRequestBody` and `parseCalculateRequest` in `internal/httpapi` keep `ServeHTTP` focused on status codes and response mapping rather than JSON details.
+- **Single calculation endpoint** — The API uses `POST /api/v1/calculate` with an `operation` and `operands` payload instead of one route per operation. This keeps the API contract small, predictable, and easy to document in OpenAPI while still allowing new operations to be added without changing the HTTP surface.
+
+- **Backend-owned calculations** — The frontend is responsible for input flow, display state, and API calls, but arithmetic is performed by the Go service. This keeps business behavior in one place and makes backend tests the source of truth for calculator correctness.
+
+- **Simple layered structure** — The backend separates calculation logic, HTTP transport, and configuration into small internal packages. This keeps the domain logic testable without an HTTP server and keeps request parsing/error mapping out of the calculator service.
+
+- **Go standard library first** — The API uses `net/http` instead of a web framework because the assignment only needs a small REST surface. This keeps dependencies minimal and makes the implementation easy to review.
+
+- **Stable error codes** — Error responses include machine-readable codes such as `DIVISION_BY_ZERO`, `INVALID_OPERAND_COUNT`, and `UNSUPPORTED_OPERATION`. The frontend and tests can rely on these codes instead of parsing human-readable messages.
+
+- **OpenAPI and Swagger** — The OpenAPI spec documents the API contract, examples, and error responses. Swagger UI is included for reviewer-friendly API exploration without requiring additional tooling.
+
+- **Standard floating-point arithmetic** — The service uses `float64` and Go's `math` package. Arbitrary precision was intentionally avoided because it would add complexity beyond the assignment scope.
+
+- **Operation registry** — Calculator operations are registered in a small operation map instead of a large conditional chain. This keeps the code readable and makes adding another operation straightforward without introducing unnecessary abstractions.
 
 ### Frontend
 
-- **`useReducer` for calculator phases** — local state models entry → operator → entry → calculate without Redux or other global state libraries.
-- **Material UI** — `Paper`, `Grid`, `Button`, and `Alert` provide a readable calculator layout and accessible feedback without custom theme abstractions.
-- **API client separation** — `calculatorClient.ts` isolates `fetch`, request shaping, and error parsing from UI components so tests can mock the API layer cleanly.
-- **Button gating** — after an operator is selected, other binary operators are disabled until `=` or **CE**, reducing invalid sequences before calling the API.
+- **Standard calculator layout** — The UI uses a familiar display and keypad layout instead of a form. This provides a more realistic calculator experience while keeping behavior intentionally simple.
+
+- **No expression parser** — The frontend models simple calculator flow: first value, operator, optional second value, equals, API call. It does not parse arbitrary expressions, which keeps scope aligned with the assignment.
+
+- **Local reducer state** — `useReducer` models calculator phases clearly without introducing global state libraries. This keeps state transitions explicit and testable.
+
+- **Material UI for readability** — Material UI components provide a polished layout, accessible controls, and consistent feedback states without custom design-system work or heavy styling abstractions.
+
+- **API client separation** — The frontend isolates request shaping, `fetch`, and error parsing in an API client module. UI components stay focused on interaction and rendering, and tests can mock API behavior cleanly.
+
+- **Clear feedback states** — Loading, success, and error states are visible in the UI so backend validation failures are understandable to the user.
 
 ## Assumptions
 
+### Product scope
+
+- This is a take-home assignment, not a production calculator platform.
+- The goal is to demonstrate correctness, maintainability, testability, API clarity, and practical AI-assisted development.
+- Persistence, authentication, user accounts, history, and advanced expression parsing are intentionally out of scope.
+
 ### Backend
 
-- Operations are lowercase strings; leading/trailing whitespace on `operation` is trimmed.
-- JSON `null` elements inside `operands` decode as `0` (Go `encoding/json` behavior).
+- Operations are represented as lowercase strings.
+- Leading and trailing whitespace in `operation` is trimmed.
+- Operands must be valid finite JSON numbers.
+- Division by zero is rejected.
+- Square root of a negative number is rejected.
+- Percentage is defined as `value * percent / 100`.
+- The API uses standard `float64` arithmetic, so normal floating-point precision behavior applies.
+- CORS is controlled through an allow-list configuration.
+- Swagger UI can be disabled through configuration.
 
 ### Frontend
 
-- Final arithmetic is not computed locally; the UI handles display formatting, input validation, and API calls only.
-- Material UI is the standard UI layer for this repo (see `.cursor/rules/project.mdc`).
+- Final arithmetic is not computed locally; the frontend delegates calculations to the backend API.
+- The UI intentionally behaves like a simple handheld calculator, not a scientific expression parser.
+- Material UI is used as the standard UI layer for this project.
+- Keyboard support is provided for common calculator actions, but advanced shortcuts are out of scope.
 
 ## AI usage
 
-AI was used to support planning, implementation review, test case generation, and documentation review. All generated code was manually reviewed, edited, tested, and validated before submission.
+AI was used to support planning, implementation review, test case discovery, documentation review, and final repository review.
+
+All AI-assisted code was manually reviewed, edited where needed, tested, and validated before submission.
 
 Details: [`docs/AI_USAGE.md`](docs/AI_USAGE.md)
